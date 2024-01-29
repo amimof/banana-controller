@@ -115,10 +115,10 @@ $(TBIN)/%: | $(TBIN) ; $(info $(M) building $(PACKAGE))
 	   #rm -rf $$tmp ; exit $$ret
 
 GOCILINT = $(TBIN)/golangci-lint
-$(TBIN)/golangci-lint: PACKAGE=github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
+$(TBIN)/golangci-lint: PACKAGE=github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
 
 GOSTATICCHECK = $(TBIN)/staticcheck
-$(TBIN)/staticcheck: PACKAGE=honnef.co/go/tools/cmd/staticcheck@latest
+$(TBIN)/staticcheck: PACKAGE=honnef.co/go/tools/cmd/staticcheck@v0.4.6
 
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
@@ -159,7 +159,7 @@ staticcheck: | $(GOSTATICCHECK) ; $(info $(M) running go-staticcheck) ## Run go-
 
 .PHONY: lint
 lint: | $(GOCILINT) ; $(info $(M) running golangci-lint) @ ## Runs static code analysis using golangci-lint
-	$Q $(GOCILINT) run --timeout 5m
+	$Q $(GOCILINT) run
 
 .PHONY: clean
 clean: ; $(info $(M) cleaning)	@ ## Cleanup everything
