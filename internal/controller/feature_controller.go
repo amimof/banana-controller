@@ -80,6 +80,8 @@ func logError(feature *bananav1alpha1.Feature, s string, l logr.Logger, err erro
 	l.Error(err, s)
 }
 
+type bananaTraceIdKey string
+
 //+kubebuilder:rbac:groups=banana.mdlwr.se,resources=features,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=banana.mdlwr.se,resources=features/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=banana.mdlwr.se,resources=features/finalizers,verbs=update
@@ -95,7 +97,9 @@ func logError(feature *bananav1alpha1.Feature, s string, l logr.Logger, err erro
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.15.0/pkg/reconcile
 func (r *FeatureReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	uid, _ := shortid.Generate()
-	ctx = context.WithValue(ctx, "banana-trace-id", uid)
+	k := bananaTraceIdKey("banana-trace-id")
+
+	ctx = context.WithValue(ctx, k, uid)
 	l := log.FromContext(ctx).WithName(uid)
 
 	// Fetch FeatureSet - This ensures that the cluster has resources of type Feature.
@@ -165,8 +169,8 @@ func (r *FeatureReconciler) setReadyStatus(ctx context.Context, feat *bananav1al
 }
 
 func (r *FeatureReconciler) ensureArgoApp(ctx context.Context, feature *bananav1alpha1.Feature) error {
-
-	l := log.FromContext(ctx).WithName(ctx.Value("banana-trace-id").(string))
+	k := bananaTraceIdKey("banana-trace-id")
+	l := log.FromContext(ctx).WithName(ctx.Value(k).(string))
 
 	// Get the Argo App by it's name. Create an app if nothing is found
 	l.Info("will try to get Application", "name", feature.Name, "Namespace", feature.Namespace)
